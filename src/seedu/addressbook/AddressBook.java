@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -115,6 +116,10 @@ public class AddressBook {
     private static final String COMMAND_LIST_WORD = "list";
     private static final String COMMAND_LIST_DESC = "Displays all persons as a list with index numbers.";
     private static final String COMMAND_LIST_EXAMPLE = COMMAND_LIST_WORD;
+
+    private static final String COMMAND_SORT_WORD = "sort";
+    private static final String COMMAND_SORT_DESC = "Displays all persons lexiographically";
+    private static final String COMMAND_SORT_EXAMPLE = COMMAND_SORT_WORD;
 
     private static final String COMMAND_DELETE_WORD = "delete";
     private static final String COMMAND_DELETE_DESC = "Deletes a person identified by the index number used in "
@@ -374,6 +379,8 @@ public class AddressBook {
             return executeFindPersons(commandArgs);
         case COMMAND_LIST_WORD:
             return executeListAllPersonsInAddressBook();
+        case COMMAND_SORT_WORD:
+            return executeSortAllPersonsInAddressBook();
         case COMMAND_DELETE_WORD:
             return executeDeletePerson(commandArgs);
         case COMMAND_CLEAR_WORD:
@@ -574,6 +581,18 @@ public class AddressBook {
      */
     private static String executeListAllPersonsInAddressBook() {
         ArrayList<HashMap<PersonProperty, String>> toBeDisplayed = getAllPersonsInAddressBook();
+        showToUser(toBeDisplayed);
+        return getMessageForPersonsDisplayedSummary(toBeDisplayed);
+    }
+
+    /**
+     * Displays all persons in the address book to the user; in lexiographically.
+     *
+     * @return feedback display message for the operation result
+     */
+    private static String executeSortAllPersonsInAddressBook(){
+        ArrayList<HashMap<PersonProperty, String>> allPersons = getAllPersonsInAddressBook();
+        ArrayList<HashMap<PersonProperty, String>> toBeDisplayed = sortLexiographicPersonsInArrayList(allPersons);
         showToUser(toBeDisplayed);
         return getMessageForPersonsDisplayedSummary(toBeDisplayed);
     }
@@ -988,14 +1007,12 @@ public class AddressBook {
 
         // phone is last arg, target is from prefix to end of string
         if (indexOfPhonePrefix > indexOfEmailPrefix) {
-            return removePrefixSign(encoded.substring(indexOfPhonePrefix, encoded.length()).trim(),
-                    PERSON_DATA_PREFIX_PHONE);
+            return removePrefixSign(encoded.substring(indexOfPhonePrefix, encoded.length()).trim());
 
         // phone is middle arg, target is from own prefix to next prefix
         } else {
             return removePrefixSign(
-                    encoded.substring(indexOfPhonePrefix, indexOfEmailPrefix).trim(),
-                    PERSON_DATA_PREFIX_PHONE);
+                    encoded.substring(indexOfPhonePrefix, indexOfEmailPrefix).trim());
         }
     }
 
@@ -1011,14 +1028,12 @@ public class AddressBook {
 
         // email is last arg, target is from prefix to end of string
         if (indexOfEmailPrefix > indexOfPhonePrefix) {
-            return removePrefixSign(encoded.substring(indexOfEmailPrefix, encoded.length()).trim(),
-                    PERSON_DATA_PREFIX_EMAIL);
+            return removePrefixSign(encoded.substring(indexOfEmailPrefix, encoded.length()).trim());
 
         // email is middle arg, target is from own prefix to next prefix
         } else {
             return removePrefixSign(
-                    encoded.substring(indexOfEmailPrefix, indexOfPhonePrefix).trim(),
-                    PERSON_DATA_PREFIX_EMAIL);
+                    encoded.substring(indexOfEmailPrefix, indexOfPhonePrefix).trim());
         }
     }
 
@@ -1084,6 +1099,7 @@ public class AddressBook {
         return getUsageInfoForAddCommand() + LS
                 + getUsageInfoForFindCommand() + LS
                 + getUsageInfoForViewCommand() + LS
+                + getUsageInfoForSortCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
                 + getUsageInfoForExitCommand() + LS
@@ -1121,6 +1137,12 @@ public class AddressBook {
     private static String getUsageInfoForViewCommand() {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_LIST_WORD, COMMAND_LIST_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_LIST_EXAMPLE) + LS;
+    }
+
+    /** Returns the string for showing 'sort' command usage instruction */
+    private static String getUsageInfoForSortCommand(){
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_SORT_WORD, COMMAND_SORT_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_SORT_EXAMPLE) + LS;
     }
 
     /** Returns string for showing 'help' command usage instruction */
@@ -1163,4 +1185,19 @@ public class AddressBook {
         return new ArrayList<>(Arrays.asList(toSplit.trim().split("\\s+")));
     }
 
+    /**
+     * Sorts an ArrayList of Persons lexiographically
+     *
+     * @param toSort source ArrayList
+     * @return sorted ArrayList
+     */
+    private static ArrayList<HashMap<PersonProperty, String>> sortLexiographicPersonsInArrayList(ArrayList<HashMap<PersonProperty, String>> toSort){
+        Collections.sort(toSort, new Comparator<HashMap<PersonProperty, String>>() {
+            @Override
+            public int compare(HashMap<PersonProperty, String> p1, HashMap<PersonProperty, String> p2) {
+                return getNameFromPerson(p2).compareTo(getNameFromPerson(p1));
+            }
+        });
+        return toSort;
+    }
 }
