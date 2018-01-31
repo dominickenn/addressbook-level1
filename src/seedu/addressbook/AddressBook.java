@@ -1196,7 +1196,7 @@ public class AddressBook {
         Collections.sort(toSort, new Comparator<HashMap<PersonProperty, String>>() {
             @Override
             public int compare(HashMap<PersonProperty, String> p1, HashMap<PersonProperty, String> p2) {
-                return getNameFromPerson(p2).compareTo(getNameFromPerson(p1));
+                return getNameFromPerson(p1).compareTo(getNameFromPerson(p2));
             }
         });
         return toSort;
