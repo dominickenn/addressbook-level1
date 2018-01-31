@@ -490,9 +490,10 @@ public class AddressBook {
      */
     private static ArrayList<HashMap<PersonProperty, String>> getPersonsWithNameContainingAnyKeyword(Collection<String> keywords) {
         final ArrayList<HashMap<PersonProperty, String>> matchedPersons = new ArrayList<>();
+        Collection<String> lowerCaseKeyWords = convertStringSetToLowerCase(keywords);
         for (HashMap<PersonProperty, String> person : getAllPersonsInAddressBook()) {
-            final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person)));
-            if (!Collections.disjoint(wordsInName, keywords)) {
+            final Set<String> wordsInName = new HashSet<>(splitByWhitespace(getNameFromPerson(person).toLowerCase()));
+            if (!Collections.disjoint(wordsInName, lowerCaseKeyWords)) {
                 matchedPersons.add(person);
             }
         }
@@ -1199,5 +1200,18 @@ public class AddressBook {
             }
         });
         return toSort;
+    }
+
+    /**
+     * Converts a set of String to lowercase
+     *
+     * @return Collection<String>
+     */
+    private static Collection<String> convertStringSetToLowerCase(Collection<String> strings) {
+        Collection<String> lowerCaseStrings = new ArrayList<String>();
+        for(String word : strings){
+            lowerCaseStrings.add(word.toLowerCase());
+        }
+        return lowerCaseStrings;
     }
 }
